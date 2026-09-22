@@ -9,7 +9,7 @@ import cb_constants as C
 import cb_evaluation as ev
 import cb_scenario as S
 
-PRESET = {"standard": "🌳 Standard", "stump": "🪓 Ein Schritt (kein Boosting)", "naive": "🎯 Naive Kodierung", "ordered": "⚖️ Geordnete Kodierung", "reg": "📈 Regression Standard"}
+PRESET = {"standard": "🌳 Standard", "stump": "🪓 Ein Schritt (kein Boosting)", "naive": "🎯 Naives Target Encoding", "ordered": "⚖️ Geordnete Target Statistics", "reg": "📈 Regression Standard"}
 
 
 @functools.lru_cache(maxsize=None)

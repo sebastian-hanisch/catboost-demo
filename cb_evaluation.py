@@ -1,5 +1,5 @@
-"""Messungen an CatBoost: Prediction-Shift-Verzerrung (in-sample gegen frisch gezogene Werte, auf reinem Rauschen - kein Signal, nur die Verzerrung selbst), Leckage der naiven
-Ziel-Mittelwert-Kodierung gegen geordnete Ziel-Statistik (Trainings-/Testabstand der Korrelation mit dem Ziel), Wirkung der Kardinalität (Zahl der Depot-Stufen)."""
+"""Messungen an CatBoost: Prediction-Shift-Verzerrung (in-sample gegen frisch gezogene Werte, auf reinem Rauschen - kein Signal, nur die Verzerrung selbst), Leckage von naivem
+Target Encoding gegen geordnete Target Statistics (Trainings-/Testabstand der Korrelation mit dem Ziel), Wirkung der Kardinalität (Zahl der Depot-Stufen)."""
 
 from dataclasses import dataclass
 
@@ -132,7 +132,7 @@ def prediction_shift_rows(n, sigma, max_bin, seed, grid=DEPTH_GRID):
     return [{"depth": d, **prediction_shift_bias(n, sigma, d, max_bin, seed)} for d in grid]
 
 
-# --- Leckage der naiven Kodierung gegen geordnete Ziel-Statistik --------------------------------------------------------------------------------------
+# --- Leckage von naivem Target Encoding gegen geordnete Target Statistics --------------------------------------------------------------------------------------
 
 def encoding_r2(cat_col, n, n_depots, seed):
     ds = S.generate_dataset(n=n, seed=seed, n_depots=n_depots)

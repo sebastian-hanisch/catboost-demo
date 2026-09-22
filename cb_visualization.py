@@ -1,4 +1,4 @@
-"""Plotly-Darstellungen: der symmetrische Baum einer Runde (jede Ebene EIN Schnitt für alle Knoten), Fehlerkurve gegen Runden, Prediction-Shift-Verzerrung gegen die Tiefe, Leckage-Vergleich
+"""Plotly-Darstellungen: der symmetrische Baum einer Runde (jede Ebene EIN Split für alle Knoten), Fehlerkurve gegen Runden, Prediction-Shift-Verzerrung gegen die Tiefe, Leckage-Vergleich
 (naiv gegen geordnet), Wirkung der Kardinalität, Wichtigkeit. Alle Achsen sind gesperrt (Touch-Scrollen).
 
 Kein 2D-Entscheidungsgrenzen-Karte wie in den Vorgänger-Stücken: die kodierten Merkmale haben je nach Kodierung unterschiedlich viele Spalten (One-Hot spreizt eine Kategorie in viele Spalten
@@ -27,7 +27,7 @@ def feature_label(names, f):
 # --- Symmetrischer Baum ------------------------------------------------------------------------------------------------------------------------------
 
 def build_symmetric_tree(tree, names, height=340):
-    """Jede Ebene ist EIN Knoten mit EINEM Schnitt (gilt für alle Zweige gleichzeitig) - gezeichnet als ein Diamant je Ebene, darunter die `2**depth` Blätter in fester Reihenfolge."""
+    """Jede Ebene ist EIN Knoten mit EINEM Split (gilt für alle Zweige gleichzeitig) - gezeichnet als ein Diamant je Ebene, darunter die `2**depth` Blätter in fester Reihenfolge."""
     depth = tree.depth
     n_leaves = tree.n_leaves
     fig = go.Figure()
@@ -94,7 +94,7 @@ def build_prediction_shift_chart(rows, height=340):
 # --- Leckage der Kodierung -------------------------------------------------------------------------------------------------------------------------------
 
 def build_leakage_chart(leakage, height=320):
-    labels = ["Naive Kodierung\n(Training)", "Geordnete Statistik\n(Training)", "beide\n(ehrlicher Test)"]
+    labels = ["Naives Target Encoding\n(Training)", "Geordnete Target Statistics\n(Training)", "beide\n(ehrlicher Test)"]
     vals = [leakage["naive_train"], leakage["ordered_train"], leakage["test"]]
     colors = [C.COLORS["naive"], C.COLORS["ordered"], "#888888"]
     fig = go.Figure(go.Bar(x=labels, y=vals, marker_color=colors, text=[f"{v:.1%}" for v in vals], textposition="outside", cliponaxis=False))
@@ -105,8 +105,8 @@ def build_leakage_chart(leakage, height=320):
 def build_cardinality_chart(rows, height=340):
     n = [r["n_depots"] for r in rows]
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=n, y=[r["naive_gap"] for r in rows], mode="lines+markers", name="Naive Kodierung", line=dict(color=C.COLORS["naive"])))
-    fig.add_trace(go.Scatter(x=n, y=[r["ordered_gap"] for r in rows], mode="lines+markers", name="Geordnete Statistik", line=dict(color=C.COLORS["ordered"])))
+    fig.add_trace(go.Scatter(x=n, y=[r["naive_gap"] for r in rows], mode="lines+markers", name="Naives Target Encoding", line=dict(color=C.COLORS["naive"])))
+    fig.add_trace(go.Scatter(x=n, y=[r["ordered_gap"] for r in rows], mode="lines+markers", name="Geordnete Target Statistics", line=dict(color=C.COLORS["ordered"])))
     fig.add_hline(y=0.0, line=dict(color="#888888", dash="dash"))
     fig.update_xaxes(title="Zahl der Depot-Stufen")
     fig.update_yaxes(title="R²-Lücke (Training minus ehrlicher Test)", tickformat=".0%")
@@ -121,5 +121,5 @@ def build_importance(labels, imp, height=330):
     fig = go.Figure(go.Bar(x=imp[order], y=[labels[f] for f in order], orientation="h", marker_color="#1f77b4",
                            text=[f"{imp[f]:.1%}" for f in order], textposition="outside", cliponaxis=False, hovertemplate="%{y}: %{x:.1%}<extra></extra>"))
     fig.update_yaxes(autorange="reversed")
-    fig.update_xaxes(title="Wichtigkeit (Anteil am Gesamtgewinn)", tickformat=".0%", rangemode="tozero")
+    fig.update_xaxes(title="Wichtigkeit (Anteil am Gesamt-Gain)", tickformat=".0%", rangemode="tozero")
     return lock_axes(fig, height, showlegend=False).update_layout(margin=dict(l=10, r=60, t=30, b=10))

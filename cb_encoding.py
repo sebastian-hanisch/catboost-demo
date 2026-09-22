@@ -1,5 +1,5 @@
-"""Kodierung kategorischer Merkmale (Wochentag, Depot): geordnete Ziel-Statistik (CatBoosts eigener Beitrag) gegen zwei Vergleichsmaßstäbe - naive Ziel-Mittelwert-Kodierung (leckt: das eigene
-Etikett der Zeile fließt in ihre eigene Kodierung ein) und One-Hot (leckt nicht, aber bei vielen Stufen dünn besetzt und hochdimensional)."""
+"""Kodierung kategorischer Merkmale (Wochentag, Depot): geordnete Target Statistics (CatBoosts eigener Beitrag) gegen zwei Vergleichsmaßstäbe - naives Target Encoding (leckt: das eigene
+Etikett der Zeile fließt in seine eigene Kodierung ein) und One-Hot (leckt nicht, aber bei vielen Stufen dünn besetzt und hochdimensional)."""
 
 import numpy as np
 
@@ -20,7 +20,7 @@ def naive_target_mean(cat_values, y, prior_weight=1.0):
 def ordered_target_stat(cat_values, y, seed, prior_weight=1.0):
     """Jede Zeile bekommt den Ziel-Mittelwert NUR der Zeilen derselben Kategorie, die in einer zufälligen Permutation VOR ihr liegen (ihre eigene Zeile zählt nie mit) - dieselbe Idee wie
     Ordered Boosting, hier auf die Merkmalskodierung angewandt. Ein Anteil `prior_weight` des globalen Mittels wird immer mit eingerechnet (verhindert Division durch 0 für die erste Zeile
-    einer Kategorie und dämpft sehr kleine Kategorien in Richtung des globalen Mittels - dieselbe Glättung wie bei der naiven Kodierung, damit der Vergleich fair bleibt)."""
+    einer Kategorie und dämpft sehr kleine Kategorien in Richtung des globalen Mittels - dieselbe Glättung wie beim naiven Target Encoding, damit der Vergleich fair bleibt)."""
     cat_values = np.asarray(cat_values).astype(int)
     y = np.asarray(y, dtype=float)
     n = len(y)

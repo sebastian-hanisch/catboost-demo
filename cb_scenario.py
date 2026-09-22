@@ -1,5 +1,5 @@
 """Die Lieferdaten der Demo: dieselben acht echten Merkmale wie in cart-demo/.../lightgbm-demo, PLUS ein neuntes - **Depot** (24 Stufen, kategorisch) - eigens für dieses Stück zurückgehalten
-(siehe Linienplan): eine Kategorie mit vielen Stufen ist genau der Fall, an dem naive Ziel-Mittelwert-Kodierung sichtbar leckt und geordnete Ziel-Statistik ihren Sinn zeigt. Jedes Depot hat einen
+(siehe Linienplan): eine Kategorie mit vielen Stufen ist genau der Fall, an dem naives Target Encoding sichtbar leckt und geordnete Target Statistics ihren Sinn zeigt. Jedes Depot hat einen
 FESTEN, zufälligen Effekt auf die Dauer (einmal gezogen, danach für alle Lieferungen dieses Depots gleich) - echtes Signal, das eine gute Kodierung finden sollte, aber mit wenigen Zeilen je Depot
 auch Rauschen zum Nachjagen bietet. **Wochentag** (7 Stufen, schon vorhanden) ist die zweite kategorische Testfläche - eine Kategorie mit wenigen, gut besetzten Stufen als Gegenbeispiel."""
 

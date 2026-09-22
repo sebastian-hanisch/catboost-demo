@@ -1,4 +1,4 @@
-"""CatBoost gegen unabhängige Referenzen: die symmetrische Gewinnformel gegen Brute-Force über dieselben Eimer-Grenzen, geordnete Ziel-Statistik nutzt nie das eigene Etikett einer Zeile
+"""CatBoost gegen unabhängige Referenzen: die symmetrische Gain-Formel gegen Brute-Force über dieselben Bin-Grenzen, geordnete Target Statistics nutzt nie das eigene Etikett einer Zeile
 (direkt nachprüfbar), geordnetes Boosting trainiert den Baum, der eine Zeile aktualisiert, NIE mit dieser Zeile selbst, Prediction-Shift-Verzerrung auf reinem Rauschen, Vorhersagen über
 Rang-/Fehlergrenzen gegen die echte `catboost`-Bibliothek."""
 
@@ -25,7 +25,7 @@ def _cls(n=400, d=5, seed=0, noise=0.5):
     return X, y
 
 
-# --- Symmetrische Gewinnformel gegen Brute-Force ------------------------------------------------------------------------------------------------------
+# --- Symmetrische Gain-Formel gegen Brute-Force ------------------------------------------------------------------------------------------------------
 
 def test_symmetric_split_matches_brute_force_at_depth_one():
     """Bei Tiefe 1 gibt es nur eine Gruppe - der symmetrische Baum muss exakt den besten Einzelschnitt finden, wie xgboost-demo/lightgbm-demo."""
@@ -61,7 +61,7 @@ def test_symmetric_tree_always_has_two_to_the_depth_leaves():
         assert tree.n_leaves == 2 ** depth
 
 
-# --- Geordnete Ziel-Statistik nutzt nie das eigene Etikett --------------------------------------------------------------------------------------------
+# --- Geordnete Target Statistics nutzt nie das eigene Etikett --------------------------------------------------------------------------------------------
 
 def test_ordered_target_statistic_never_uses_its_own_row():
     """Verändert man NUR y_i (die eigene Zeile), darf sich die geordnete Kodierung jeder ANDEREN Zeile derselben Kategorie nicht ändern, wenn sie vor i liegt (`prior_weight=0`, damit der

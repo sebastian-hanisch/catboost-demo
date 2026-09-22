@@ -31,9 +31,9 @@ LR_MIN, LR_MAX, DEFAULT_LR = 0.02, 1.0, 0.1
 LAM_MIN, LAM_MAX, DEFAULT_LAM = 0.0, 20.0, 5.0
 N_BLOCKS_MIN, N_BLOCKS_MAX, DEFAULT_N_BLOCKS = 2, 32, 8           # Stützmodelle des geordneten Boostings (Annäherung an CatBoosts O(log n))
 ENCODING_OPTIONS = ("ordered", "naive", "onehot")
-ENCODING_LABELS = {"ordered": "Geordnete Ziel-Statistik", "naive": "Naive Ziel-Mittelwert-Kodierung", "onehot": "One-Hot"}
+ENCODING_LABELS = {"ordered": "Geordnete Target Statistics", "naive": "Naives Target Encoding", "onehot": "One-Hot"}
 DEFAULT_ENCODING = "ordered"
-TS_PRIOR_WEIGHT = 1.0                # Gewicht des globalen Mittels in der (naiven wie geordneten) Ziel-Statistik, verhindert Division durch 0 bei leeren Kategorien
+TS_PRIOR_WEIGHT = 1.0                # Gewicht des globalen Mittels in der (naiven wie geordneten) Target Statistics, verhindert Division durch 0 bei leeren Kategorien
 
 DEFAULT_MAP = (0, 3)
 
@@ -44,17 +44,17 @@ PRESETS = {
                         n_depots=24, n=DEFAULT_N, n_noise=DEFAULT_NOISE, label_noise=0, seed=DEFAULT_SEED),
     "🪓 Ein Schritt (kein Boosting)": dict(task="class", encoding="ordered", ordered=False, depth=1, n_rounds=1, lr=1.0, lam=DEFAULT_LAM, n_blocks=DEFAULT_N_BLOCKS, n_depots=24,
                                           n=DEFAULT_N, n_noise=DEFAULT_NOISE, label_noise=0, seed=DEFAULT_SEED),
-    "🎯 Naive Kodierung": dict(task="class", encoding="naive", ordered=False, depth=DEFAULT_DEPTH, n_rounds=DEFAULT_N_ROUNDS, lr=DEFAULT_LR, lam=DEFAULT_LAM, n_blocks=DEFAULT_N_BLOCKS,
+    "🎯 Naives Target Encoding": dict(task="class", encoding="naive", ordered=False, depth=DEFAULT_DEPTH, n_rounds=DEFAULT_N_ROUNDS, lr=DEFAULT_LR, lam=DEFAULT_LAM, n_blocks=DEFAULT_N_BLOCKS,
                               n_depots=24, n=DEFAULT_N, n_noise=DEFAULT_NOISE, label_noise=0, seed=DEFAULT_SEED),
-    "⚖️ Geordnete Kodierung": dict(task="class", encoding="ordered", ordered=False, depth=DEFAULT_DEPTH, n_rounds=DEFAULT_N_ROUNDS, lr=DEFAULT_LR, lam=DEFAULT_LAM, n_blocks=DEFAULT_N_BLOCKS,
+    "⚖️ Geordnete Target Statistics": dict(task="class", encoding="ordered", ordered=False, depth=DEFAULT_DEPTH, n_rounds=DEFAULT_N_ROUNDS, lr=DEFAULT_LR, lam=DEFAULT_LAM, n_blocks=DEFAULT_N_BLOCKS,
                                   n_depots=24, n=DEFAULT_N, n_noise=DEFAULT_NOISE, label_noise=0, seed=DEFAULT_SEED),
     "📈 Regression Standard": dict(task="reg", encoding="ordered", ordered=True, depth=DEFAULT_DEPTH, n_rounds=DEFAULT_N_ROUNDS, lr=DEFAULT_LR, lam=DEFAULT_LAM, n_blocks=DEFAULT_N_BLOCKS,
                                    n_depots=24, n=DEFAULT_N, n_noise=DEFAULT_NOISE, label_noise=0, seed=DEFAULT_SEED),
 }
 PRESET_HELP = {
-    "🌳 Standard": "Geordnete Ziel-Statistik + geordnetes Boosting (8 Stützblöcke), Tiefe 3 (8 Blätter, symmetrisch), 40 Runden: Trainingsfehler 21.4 %, Testfehler 22.2 % (Raten: 48.9 %).",
+    "🌳 Standard": "Geordnete Target Statistics + geordnetes Boosting (8 Stützblöcke), Tiefe 3 (8 Blätter, symmetrisch), 40 Runden: Trainingsfehler 21.4 %, Testfehler 22.2 % (Raten: 48.9 %).",
     "🪓 Ein Schritt (kein Boosting)": "Ein einzelner symmetrischer Tiefe-1-Baum (Lernrate 1, gewöhnliches Boosting): Testfehler 28.9 % - deutlich besser als Raten (48.9 %), aber noch weit von einem fertigen Ensemble entfernt.",
-    "🎯 Naive Kodierung": "Gewöhnliches (nicht geordnetes) Boosting mit naiver Ziel-Mittelwert-Kodierung für Wochentag und Depot: Trainingsfehler 15.7 %, Testfehler 18.6 % - die Kodierung selbst leckt messbar (siehe Experiment unten), was hier aber nicht automatisch zu einem schlechteren TESTfehler führt.",
-    "⚖️ Geordnete Kodierung": "Dieselben Einstellungen, nur geordnete statt naive Kodierung: Trainingsfehler 17.3 %, Testfehler 20.6 % - etwas schlechter als naiv in diesem Durchlauf. Die Kodierungs-Leckage zeigt sich zuverlässig in der Korrelation mit dem eigenen Ziel (Experiment unten), nicht zwangsläufig im End-zu-End-Testfehler dieses Beispiels.",
-    "📈 Regression Standard": "Geordnete Kodierung + geordnetes Boosting, Ziel Lieferdauer: Test-RMSE 14.2 Minuten - spürbar höher als Gradient Boosting/XGBoost/LightGBM (rund 9-10 Minuten), der Preis der vereinfachten Blockannäherung (siehe README).",
+    "🎯 Naives Target Encoding": "Gewöhnliches (nicht geordnetes) Boosting mit naivem Target Encoding für Wochentag und Depot: Trainingsfehler 15.7 %, Testfehler 18.6 % - die Kodierung selbst leckt messbar (siehe Experiment unten), was hier aber nicht automatisch zu einem schlechteren TESTfehler führt.",
+    "⚖️ Geordnete Target Statistics": "Dieselben Einstellungen, nur geordnete Target Statistics statt naives Target Encoding: Trainingsfehler 17.3 %, Testfehler 20.6 % - etwas schlechter als naiv in diesem Durchlauf. Die Kodierungs-Leckage zeigt sich zuverlässig in der Korrelation mit dem eigenen Ziel (Experiment unten), nicht zwangsläufig im End-zu-End-Testfehler dieses Beispiels.",
+    "📈 Regression Standard": "Geordnete Target Statistics + geordnetes Boosting, Ziel Lieferdauer: Test-RMSE 14.2 Minuten - spürbar höher als Gradient Boosting/XGBoost/LightGBM (rund 9-10 Minuten), der Preis der vereinfachten Blockannäherung (siehe README).",
 }

@@ -1,10 +1,10 @@
-"""CatBoost - Prediction Shift, geordnetes Boosting und geordnete Ziel-Statistik - interaktive Konzept-Demo
+"""CatBoost - Prediction Shift, geordnetes Boosting und geordnete Target Statistics - interaktive Konzept-Demo
 Sebastian Hanisch - Operations Research und Machine Learning
 
 Anders als die Fall-Demos im Portfolio (ein Anwendungsfall, mehrere Verfahren im Vergleich) zeigt diese Demo EIN Verfahren - CatBoost - und lässt stattdessen das Beispiel wachsen.
 Neuntes und letztes Stück der Baumbasierten Linie der "Konzepte"-Reihe, fünftes Stück des Boosting-Asts (nach AdaBoost, Gradient Boosting, XGBoost, LightGBM): der Kern dieses Stücks ist
-nicht eine neue Gewinnformel, sondern eine neue FRAGE - woher kommt der Gradient, den ein Baum lernt, und woher die Kodierung eines kategorischen Merkmals? Beide können vom selben Beispiel
-"lecken", das sie gerade vorhersagen sollen (Prediction Shift). CatBoosts Antwort: geordnetes Boosting und geordnete Ziel-Statistik - nie mit dem eigenen Etikett einer Zeile rechnen.
+nicht eine neue Gain-Formel, sondern eine neue FRAGE - woher kommt der Gradient, den ein Baum lernt, und woher die Kodierung eines kategorischen Merkmals? Beide können vom selben Beispiel
+"lecken", das sie gerade vorhersagen sollen (Prediction Shift). CatBoosts Antwort: geordnetes Boosting und geordnete Target Statistics - nie mit dem eigenen Etikett einer Zeile rechnen.
 Siehe README für die Einordnung.
 
 Lauffähig mit: streamlit run app.py
@@ -78,11 +78,11 @@ def _cardinality(n):
 st.title("🐈🌳 CatBoost – geordnetes Boosting gegen Prediction Shift")
 st.markdown(
     """
-Jedes bisherige Stück dieser Linie hat eine neue Schnittsuche oder Regularisierung gezeigt - CatBoost (Prokhorenkova et al. 2018) stellt eine andere Frage: **woher kommt der Gradient, den
+Jedes bisherige Stück dieser Linie hat eine neue Split-Suche oder Regularisierung gezeigt - CatBoost (Prokhorenkova et al. 2018) stellt eine andere Frage: **woher kommt der Gradient, den
 ein Baum lernt?** In gewöhnlichem Boosting stammt der Pseudo-Gradient einer Zeile von einem Modell, das diese Zeile SCHON GESEHEN hat - ihr Rest wirkt dann systematisch zu klein
-(**Prediction Shift**). Dieselbe Falle gibt es bei kategorischen Merkmalen: eine naive Ziel-Mittelwert-Kodierung rechnet das eigene Etikett der Zeile in ihre eigene Kodierung ein.
-CatBoosts Antwort auf beides: **nie mit dem eigenen Etikett einer Zeile rechnen** - geordnetes Boosting (eine zufällige Permutation, nur Zeilen davor zählen) und geordnete Ziel-Statistik
-(dieselbe Idee für Merkmale). Dazu: **vollständig symmetrische Bäume** - jede Ebene ein einziger Schnitt für alle Knoten gleichzeitig.
+(**Prediction Shift**). Dieselbe Falle gibt es bei kategorischen Merkmalen: ein naives Target Encoding rechnet das eigene Etikett der Zeile in seine eigene Kodierung ein.
+CatBoosts Antwort auf beides: **nie mit dem eigenen Etikett einer Zeile rechnen** - geordnetes Boosting (eine zufällige Permutation, nur Zeilen davor zählen) und geordnete Target Statistics
+(dieselbe Idee für Merkmale). Dazu: **vollständig symmetrische Bäume** - jede Ebene ein einziger Split für alle Knoten gleichzeitig.
 """
 )
 st.caption(
@@ -104,9 +104,9 @@ with st.expander("So funktioniert CatBoost", expanded=True):
    systematisch zu klein (unten mit reinem Rauschen nachgewiesen, ohne jedes echte Signal).
 2. **Geordnetes Boosting:** eine zufällige Permutation der Zeilen; der Baum, der eine Zeile aktualisiert, wird nur mit Zeilen trainiert, die in der Permutation VOR ihr liegen - nie mit der
    Zeile selbst oder etwas danach.
-3. **Geordnete Ziel-Statistik:** dieselbe Idee für ein kategorisches Merkmal (Wochentag, Depot) - die Kodierung einer Zeile nutzt nur den Ziel-Mittelwert der Zeilen derselben Kategorie, die
+3. **Geordnete Target Statistics:** dieselbe Idee für ein kategorisches Merkmal (Wochentag, Depot) - die Kodierung einer Zeile nutzt nur den Ziel-Mittelwert der Zeilen derselben Kategorie, die
    VOR ihr in der Permutation liegen, nie ihr eigenes Etikett.
-4. **Symmetrische Bäume:** jede Ebene ein einziger Schnitt (Merkmal + Schwelle) für alle Knoten dieser Ebene gleichzeitig - ein Baum der Tiefe $d$ hat immer genau $2^d$ Blätter.
+4. **Symmetrische Bäume:** jede Ebene ein einziger Split (Merkmal + Schwelle) für alle Knoten dieser Ebene gleichzeitig - ein Baum der Tiefe $d$ hat immer genau $2^d$ Blätter.
         """
     )
 
@@ -168,7 +168,7 @@ if st.session_state.get("cb_owner") != view_key:
 # --- CatBoost in Aktion -------------------------------------------------------------------------------------------------------------------------------
 
 st.markdown("## 🐈 CatBoost in Aktion")
-st.caption("Runde für Runde: der symmetrische Baum dieser Runde - jede Ebene (Raute) ist EIN Schnitt für alle Zweige gleichzeitig, die Blätter darunter tragen die Newton-Gewichte.")
+st.caption("Runde für Runde: der symmetrische Baum dieser Runde - jede Ebene (Raute) ist EIN Split für alle Zweige gleichzeitig, die Blätter darunter tragen die Newton-Gewichte.")
 if n_rounds_actual > 1:
     step_col, play_col = st.columns([5, 2])
     with step_col:
@@ -224,7 +224,7 @@ st.caption(f"Bester Testfehler bei Runde {best['k']} ({_err(task, best['test'])}
 st.markdown("**Wichtigkeit je Merkmal**")
 labels = EN.encoded_names(names, C.CAT_FEATURES, a.encoders)
 st.plotly_chart(build_importance(labels, a.imp), width="stretch", key="importance_chart")
-st.caption("Gemittelt über alle Bäume des Ensembles (bei geordnetem Boosting: der jeweils vollständigste Baum je Runde). Summe der Schnittgewinne je Merkmal, auf 1 normiert.")
+st.caption("Gemittelt über alle Bäume des Ensembles (bei geordnetem Boosting: der jeweils vollständigste Baum je Runde). Summe der Split-Gains je Merkmal, auf 1 normiert.")
 
 st.markdown("---")
 
@@ -245,7 +245,7 @@ if st.session_state.get("shift_on"):
 
 st.markdown("---")
 
-st.subheader("🔬 Leckage der naiven Kodierung gegen geordnete Statistik")
+st.subheader("🔬 Leckage von Target Encoding gegen geordnete Target Statistics")
 if st.button("Korrelation mit dem eigenen Ziel messen, Training gegen ehrlichen Test (dauert einen Moment)", key="leak_start"):
     st.session_state["leak_on"] = True
 if st.session_state.get("leak_on"):
@@ -253,7 +253,7 @@ if st.session_state.get("leak_on"):
         lk = _leakage(int(n), int(n_depots))
     st.plotly_chart(build_leakage_chart(lk), width="stretch", key="leakage_chart")
     st.caption(f"R² zwischen der Depot-Kodierung und der Lieferdauer, Mittel über fünf Datensätze: naiv sieht im Training ({lk['naive_train']:.1%}) deutlich besser aus als im ehrlichen Test "
-               f"({lk['test']:.1%}) - das eigene Etikett jeder Zeile fließt in ihre eigene Kodierung ein. Geordnete Statistik liegt im Training ({lk['ordered_train']:.1%}) schon nah am "
+               f"({lk['test']:.1%}) - das eigene Etikett jeder Zeile fließt in ihre eigene Kodierung ein. Geordnete Target Statistics liegt im Training ({lk['ordered_train']:.1%}) schon nah am "
                "ehrlichen Wert - sie hat nie das eigene Etikett gesehen.")
 
 st.markdown("---")
@@ -266,9 +266,9 @@ if st.session_state.get("card_on"):
         cr = _cardinality(int(n))
     st.plotly_chart(build_cardinality_chart(cr), width="stretch", key="cardinality_chart")
     c0, c1 = cr[0], cr[-1]
-    st.caption(f"Bei {c0['n_depots']} Depots ({c0['rows_per_depot']} Zeilen je Depot im Training) ist die Lücke der naiven Kodierung klein ({c0['naive_gap']:+.1%}); bei {c1['n_depots']} "
+    st.caption(f"Bei {c0['n_depots']} Depots ({c0['rows_per_depot']} Zeilen je Depot im Training) ist die Lücke von naivem Target Encoding klein ({c0['naive_gap']:+.1%}); bei {c1['n_depots']} "
                f"Depots (nur noch {c1['rows_per_depot']} Zeilen je Depot) wächst sie auf {c1['naive_gap']:+.1%} - je weniger Zeilen eine Kategorie hat, desto mehr trägt eine einzelne Zeile "
-               "zu ihrer eigenen naiven Kodierung bei. Die geordnete Statistik bleibt über alle Stufenzahlen nah bei 0.")
+               "zu ihrem eigenen naiven Target Encoding bei. Die geordnete Target Statistics bleibt über alle Stufenzahlen nah bei 0.")
 
 st.markdown("---")
 
@@ -279,10 +279,10 @@ st.markdown(
     """
 | Annahme | Was passiert, wenn sie verletzt ist | Wer setzt an |
 |---|---|---|
-| **Geordnetes Boosting gewinnt immer gegen gewöhnliches** | In dieser vereinfachten, block-genäherten Fassung (eine feste Permutation statt mehrerer, feste statt geometrisch wachsender Blöcke) schneidet geordnetes Boosting in diesem Datensatz nicht besser ab als gewöhnliches - der Preis, weniger Zeilen je Baum zu sehen, überwiegt den Gewinn aus weniger Verzerrung (gemessen, siehe README). | mehrere Permutationen mitteln (echtes CatBoost), größere Datensätze |
+| **Geordnetes Boosting gewinnt immer gegen gewöhnliches** | In dieser vereinfachten, block-genäherten Fassung (eine feste Permutation statt mehrerer, feste statt geometrisch wachsender Blöcke) schneidet geordnetes Boosting in diesem Datensatz nicht besser ab als gewöhnliches - der Preis, weniger Zeilen je Baum zu sehen, überwiegt den Gain aus weniger Verzerrung (gemessen, siehe README). | mehrere Permutationen mitteln (echtes CatBoost), größere Datensätze |
 | **Beliebig viele Runden bei Regression sind sicher** | Wenige Zeilen je Block plus hohe Tiefe/Lernrate/Rundenzahl können einzelne Zeilenvorhersagen zunehmend instabil werden lassen (gefunden und mit stärkerem λ/kleinerer Lernrate eingedämmt, nicht vollständig beseitigt). | mehr λ, kleinere Lernrate, weniger Runden, mehr Stützblöcke |
 | **Kodierungs-Leckage schlägt immer auf den Testfehler durch** | Die Leckage ist in der Kodierung selbst klar messbar (Korrelations-Lücke oben), muss sich aber nicht automatisch in einem schlechteren End-zu-End-Testfehler zeigen, wenn das zugrunde liegende Signal echt und zwischen Training und Test konsistent ist. | die Kodierung selbst prüfen, nicht nur den Endfehler |
-| **Symmetrische Bäume sind immer so gut wie unregelmäßige** | Ein Schnitt gilt für ALLE Knoten einer Ebene - ein Merkmal, das nur in einem Teil des Datenraums hilft, kann trotzdem gewählt werden und dort schadet, wo es nicht passt. | Tiefe klein halten, Wichtigkeit prüfen |
+| **Symmetrische Bäume sind immer so gut wie unregelmäßige** | Ein Split gilt für ALLE Knoten einer Ebene - ein Merkmal, das nur in einem Teil des Datenraums hilft, kann trotzdem gewählt werden und dort schadet, wo es nicht passt. | Tiefe klein halten, Wichtigkeit prüfen |
 """
 )
 
@@ -291,14 +291,14 @@ st.markdown("---")
 with st.expander("📐 Mathematische Formulierung"):
     st.markdown(
         r"""
-**Symmetrischer Baum.** Ebene $\ell=1,\dots,d$: EIN Schnitt $(f_\ell,\theta_\ell)$ für alle aktuellen Gruppen $g$ gleichzeitig, gewählt um $\sum_g \text{Gain}_g(f,\theta)$ zu maximieren
-(dieselbe Gewinnformel wie xgboost-demo/lightgbm-demo, summiert über Gruppen). Ergebnis: $2^d$ Blätter, Blattwert $-G_j/(H_j+\lambda)$ wie üblich.
+**Symmetrischer Baum.** Ebene $\ell=1,\dots,d$: EIN Split $(f_\ell,\theta_\ell)$ für alle aktuellen Gruppen $g$ gleichzeitig, gewählt um $\sum_g \text{Gain}_g(f,\theta)$ zu maximieren
+(dieselbe Gain-Formel wie xgboost-demo/lightgbm-demo, summiert über Gruppen). Ergebnis: $2^d$ Blätter, Blattwert $-G_j/(H_j+\lambda)$ wie üblich.
 
 **Geordnetes Boosting** (vereinfacht: `n_blocks` feste Blöcke statt CatBoosts $O(\log n)$ geometrisch wachsender Stützmodelle einer zufälligen Permutation). Block $k$'s Baum trainiert NUR
 mit Gradienten aus Block $0,\dots,k-1$: $g_i,h_i = \partial l(y_i,F_i)/\partial F_i,\ \partial^2 l/\partial F_i^2$ für $i\in\text{Block}_{<k}$; seine Vorhersage aktualisiert NUR Zeilen aus
 Block $k$. Block 0 hat keinen Vorgänger und bekommt einen eigenen, gewöhnlichen (selbstbezogenen) Baum, sonst bliebe seine Vorhersage für immer beim Startwert stehen.
 
-**Geordnete Ziel-Statistik** für eine Kategorie $c$: $\text{TS}_i = \dfrac{\sum_{j\prec i,\,\text{cat}_j=c} y_j + a\cdot p}{|\{j\prec i: \text{cat}_j=c\}| + a}$ mit $\prec$ = "liegt vor $i$
+**Geordnete Target Statistics** für eine Kategorie $c$: $\text{TS}_i = \dfrac{\sum_{j\prec i,\,\text{cat}_j=c} y_j + a\cdot p}{|\{j\prec i: \text{cat}_j=c\}| + a}$ mit $\prec$ = "liegt vor $i$
 in der Permutation", $p$ = globaler Mittelwert, $a$ = Gewicht des Prior - $y_i$ selbst kommt in der Summe nie vor.
 
 **Prediction Shift:** für eine Zeile $i$, deren Blattwert (oder TS) UNTER Einbeziehung von $y_i$ berechnet wurde, ist $\mathbb E[\hat y_i - y_i \mid \text{Blatt}]$ systematisch verzerrt -

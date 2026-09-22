@@ -140,7 +140,7 @@ def test_permalink_parameters_are_clamped():
 
 
 def test_the_address_bar_mirrors_the_settings():
-    at = _run(lambda a: _apply(a, C.PRESETS["🎯 Naive Kodierung"]))
+    at = _run(lambda a: _apply(a, C.PRESETS["🎯 Naives Target Encoding"]))
     assert str(at.query_params["enc"]) in ("naive", "['naive']")
 
 

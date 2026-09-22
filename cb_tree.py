@@ -1,7 +1,7 @@
 """Der CatBoost-Baumkern: **vollständig symmetrische (oblivious) Bäume** - anders als jeder Baum in dieser Linie (unregelmäßige, individuell gewachsene Knoten) benutzt JEDE Ebene EINEN einzigen
-Schnitt (Merkmal + Schwelle) für ALLE Knoten dieser Ebene gleichzeitig. Ein Baum der Tiefe `depth` hat deshalb immer genau `2**depth` Blätter, und lässt sich als `depth` Schnitte (statt eines
-Baums aus Knoten) darstellen - Vorhersage ist ein paar Vergleiche, kein Baumdurchlauf. Die Schnittsuche wiederverwendet die Histogramm-Bausteine aus lightgbm-demo (Eimer einmal berechnen, je
-Gruppe ein Histogramm), sucht aber je Ebene den Schnitt, der den GEWINN ÜBER ALLE AKTUELLEN GRUPPEN SUMMIERT maximiert - eine echt neue Schnittsuche, kein wiederverwendeter Kern."""
+Split (Merkmal + Schwelle) für ALLE Knoten dieser Ebene gleichzeitig. Ein Baum der Tiefe `depth` hat deshalb immer genau `2**depth` Blätter, und lässt sich als `depth` Splits (statt eines
+Baums aus Knoten) darstellen - Vorhersage ist ein paar Vergleiche, kein Baumdurchlauf. Die Split-Suche wiederverwendet die Histogramm-Bausteine aus lightgbm-demo (Bins einmal berechnen, je
+Gruppe ein Histogramm), sucht aber je Ebene den Split, der den GAIN ÜBER ALLE AKTUELLEN GRUPPEN SUMMIERT maximiert - eine echt neue Split-Suche, kein wiederverwendeter Kern."""
 
 from dataclasses import dataclass
 
@@ -15,7 +15,7 @@ class Tree:
     features: np.ndarray         # (depth,) Merkmal je Ebene
     thresholds: np.ndarray       # (depth,) Schwelle je Ebene
     values: np.ndarray           # (2**depth,) Blattwert je Blattindex
-    gains: np.ndarray            # (depth,) über alle Gruppen summierter Gewinn je Ebene
+    gains: np.ndarray            # (depth,) über alle Gruppen summierter Gain je Ebene
     depth: int
     lam: float
     n_features: int
@@ -25,7 +25,7 @@ class Tree:
         return len(self.values)
 
 
-# --- Eimer (wortgleiches Vorgehen wie lightgbm-demo) --------------------------------------------------------------------------------------------------
+# --- Bins (wortgleiches Vorgehen wie lightgbm-demo) --------------------------------------------------------------------------------------------------
 
 def build_bin_edges(X, max_bin):
     edges = []
@@ -50,10 +50,10 @@ def histogram(bins_f, grad, hess, n_bins):
     return g, h
 
 
-# --- Symmetrisches Wachsen: EIN Schnitt je Ebene, über alle Gruppen hinweg ----------------------------------------------------------------------------
+# --- Symmetrisches Wachsen: EIN Split je Ebene, über alle Gruppen hinweg ----------------------------------------------------------------------------
 
 def grow(X, grad, hess, edges, depth, lam=1.0):
-    """Wächst `depth` Ebenen; jede Ebene wählt den (Merkmal, Schwelle), der den Gewinn summiert über ALLE aktuellen Gruppen maximiert, und wendet ihn auf jede Gruppe gleichzeitig an.
+    """Wächst `depth` Ebenen; jede Ebene wählt den (Merkmal, Schwelle), der den Gain summiert über ALLE aktuellen Gruppen maximiert, und wendet ihn auf jede Gruppe gleichzeitig an.
     Endet immer mit genau `2**depth` Blättern (keine Vorwärts-Beschneidung wie gamma/min_child_weight in xgboost-demo/lightgbm-demo - das ist hier bewusst nicht der Untersuchungsgegenstand)."""
     X = np.asarray(X, dtype=float)
     grad = np.asarray(grad, dtype=float)
