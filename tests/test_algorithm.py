@@ -186,3 +186,24 @@ def test_generator_matches_cart_demo_conventions_otherwise():
     ds = S.generate_dataset(500, 3, 0, 7)
     Xtr, ytr, Xte, yte = S.split(ds, "class")
     assert len(Xtr) == 350 and len(Xte) == 150 and ds.names[:2] == ("Distanz", "Ladegewicht")
+
+
+def test_rare_binary_feature_is_splittable():
+    # Bin k = (edges[k-1], edges[k]] muss zu "X > Schwelle geht nach rechts" passen: sonst ist die Schwelle 1.0 eines 0/1-Merkmals wirkungslos
+    rng = np.random.default_rng(0)
+    x = np.zeros(1000)
+    x[:30] = 1.0
+    X = x.reshape(-1, 1)
+    y = 5.0 * x + rng.normal(0, 0.1, 1000)
+    edges = T.build_bin_edges(X, 63)
+    assert np.array_equal(edges[0], [0.0, 1.0])
+    tree = T.grow(X, -y, np.ones(1000), edges, depth=1)
+    assert tree.thresholds[0] == 0.0
+    pred = T.predict_value(tree, X)
+    assert pred[x == 1].mean() > 4.0 and abs(pred[x == 0].mean()) < 0.1
+
+
+def test_bins_are_consistent_with_the_threshold_rule():
+    X = np.array([[0.0], [1.0], [1.0], [2.0], [3.0], [3.0]])
+    assert T.digitize(X, [np.array([1.0, 3.0])])[:, 0].tolist() == [0, 0, 0, 1, 1, 1]
+

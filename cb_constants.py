@@ -52,9 +52,9 @@ PRESETS = {
                                    n_depots=24, n=DEFAULT_N, n_noise=DEFAULT_NOISE, label_noise=0, seed=DEFAULT_SEED),
 }
 PRESET_HELP = {
-    "🌳 Standard": "Geordnete Target Statistics + geordnetes Boosting (8 Stützblöcke), Tiefe 3 (8 Blätter, symmetrisch), 40 Runden: Trainingsfehler 21.4 %, Testfehler 22.2 % (Raten: 48.9 %).",
+    "🌳 Standard": "Geordnete Target Statistics + geordnetes Boosting (8 Stützblöcke), Tiefe 3 (8 Blätter, symmetrisch), 40 Runden: Trainingsfehler 20.7 %, Testfehler 20.8 % (Raten: 48.9 %).",
     "🪓 Ein Schritt (kein Boosting)": "Ein einzelner symmetrischer Tiefe-1-Baum (Lernrate 1, gewöhnliches Boosting): Testfehler 28.9 % - deutlich besser als Raten (48.9 %), aber noch weit von einem fertigen Ensemble entfernt.",
-    "🎯 Naives Target Encoding": "Gewöhnliches (nicht geordnetes) Boosting mit naivem Target Encoding für Wochentag und Depot: Trainingsfehler 15.7 %, Testfehler 18.6 % - die Kodierung selbst leckt messbar (siehe Experiment unten), was hier aber nicht automatisch zu einem schlechteren TESTfehler führt.",
-    "⚖️ Geordnete Target Statistics": "Dieselben Einstellungen, nur geordnete Target Statistics statt naives Target Encoding: Trainingsfehler 17.3 %, Testfehler 20.6 % - etwas schlechter als naiv in diesem Durchlauf. Die Kodierungs-Leckage zeigt sich zuverlässig in der Korrelation mit dem eigenen Ziel (Experiment unten), nicht zwangsläufig im End-zu-End-Testfehler dieses Beispiels.",
-    "📈 Regression Standard": "Geordnete Target Statistics + geordnetes Boosting, Ziel Lieferdauer: Test-RMSE 14.2 Minuten - spürbar höher als Gradient Boosting/XGBoost/LightGBM (rund 9-10 Minuten), der Preis der vereinfachten Blockannäherung (siehe README).",
+    "🎯 Naives Target Encoding": "Gewöhnliches (nicht geordnetes) Boosting mit naivem Target Encoding für Wochentag und Depot: Trainingsfehler 15.2 %, Testfehler 19.4 % - die Kodierung selbst leckt messbar (siehe Experiment unten), was hier aber nicht automatisch zu einem schlechteren TESTfehler führt.",
+    "⚖️ Geordnete Target Statistics": "Dieselben Einstellungen, nur geordnete Target Statistics statt naives Target Encoding: Trainingsfehler 17.4 %, Testfehler 20.0 % - etwas schlechter als naiv in diesem Durchlauf. Die Kodierungs-Leckage zeigt sich zuverlässig in der Korrelation mit dem eigenen Ziel (Experiment unten), nicht zwangsläufig im End-zu-End-Testfehler dieses Beispiels.",
+    "📈 Regression Standard": "Geordnete Target Statistics + geordnetes Boosting, Ziel Lieferdauer: Test-RMSE 13.6 Minuten - spürbar höher als Gradient Boosting/XGBoost/LightGBM (rund 9-10 Minuten), der Preis der vereinfachten Blockannäherung (siehe README).",
 }

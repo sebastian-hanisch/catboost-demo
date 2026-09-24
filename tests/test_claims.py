@@ -1,4 +1,4 @@
-"""Jede Zahl aus Texten, Hilfen und README ist hier belegt (gemessen am 2026-09-22, Toleranzen fangen Rundung ab). `analyse()` und die Experiment-Funktionen sind deterministisch (kein Zufall
+"""Jede Zahl aus Texten, Hilfen und README ist hier belegt (gemessen am 2026-09-24 nach der Bin-Korrektur, Toleranzen fangen Rundung ab). `analyse()` und die Experiment-Funktionen sind deterministisch (kein Zufall
 außer im Datenerzeuger, der - festen, mit `seed` reproduzierbaren - Permutation des geordneten Boostings/der Kodierung und der Teilstichprobe)."""
 
 import functools
@@ -28,8 +28,8 @@ def _help(key, *needles):
 
 def test_standard_preset():
     a = _preset("standard")
-    assert (a.train["error"], a.test["error"], a.baseline) == pytest.approx((0.2143, 0.2222, 0.4889), abs=0.0015)
-    _help("standard", "21.4 %", "22.2 %", "48.9 %")
+    assert (a.train["error"], a.test["error"], a.baseline) == pytest.approx((0.2071, 0.2083, 0.4889), abs=0.0015)
+    _help("standard", "20.7 %", "20.8 %", "48.9 %")
 
 
 def test_single_step_preset_beats_guessing_but_not_by_much():
@@ -42,17 +42,18 @@ def test_single_step_preset_beats_guessing_but_not_by_much():
 def test_naive_vs_ordered_encoding_end_to_end_preset_numbers():
     naive = _preset("naive")
     ordered = _preset("ordered")
-    assert (naive.train["error"], naive.test["error"]) == pytest.approx((0.1571, 0.1861), abs=0.0015)
-    assert (ordered.train["error"], ordered.test["error"]) == pytest.approx((0.1726, 0.2056), abs=0.0015)
-    _help("naive", "15.7 %", "18.6 %")
-    _help("ordered", "17.3 %", "20.6 %")
+    assert (naive.train["error"], naive.test["error"]) == pytest.approx((0.1524, 0.1944), abs=0.0015)
+    assert (ordered.train["error"], ordered.test["error"]) == pytest.approx((0.1738, 0.2000), abs=0.0015)
+    _help("naive", "15.2 %", "19.4 %")
+    _help("ordered", "17.4 %", "20.0 %")
+    assert ordered.test["error"] > naive.test["error"]                                       # geordnet in diesem Durchlauf etwas schlechter als naiv (Text der Hilfe)
 
 
 def test_regression_standard_preset():
     a = _preset("reg")
     assert a.task == "reg"
-    assert a.test["rmse"] == pytest.approx(14.232, abs=0.02)
-    _help("reg", "14.2")
+    assert a.test["rmse"] == pytest.approx(13.645, abs=0.02)
+    _help("reg", "13.6")
 
 
 def test_every_preset_is_a_valid_setting():
@@ -70,7 +71,7 @@ def test_prediction_shift_experiment_numbers():
     rows = ev.prediction_shift_rows(400, 7.0, 63, C.DEFAULT_SEED)
     d1, d6 = rows[0], rows[-1]
     assert (d1["in_sample"], d1["fresh"]) == pytest.approx((49.04, 51.82), abs=0.05)
-    assert (d6["in_sample"], d6["fresh"]) == pytest.approx((40.63, 59.10), abs=0.05)
+    assert (d6["in_sample"], d6["fresh"]) == pytest.approx((39.07, 60.17), abs=0.05)
     assert all(r["true"] == pytest.approx(49.0) for r in rows)
     in_sample = [r["in_sample"] for r in rows]
     fresh = [r["fresh"] for r in rows]

@@ -26,7 +26,7 @@ CART → AdaBoost → Gradient Boosting → XGBoost → LightGBM → CatBoost (d
 | **Symmetrische Gain-Formel gegen Brute-Force** | ✅ Bei Tiefe 1 (eine Gruppe) findet der symmetrische Baumkern exakt denselben besten Split wie eine Brute-Force-Suche über dieselben Bin-Grenzen. |
 | **Geordnete Target Statistics nutzt nie das eigene Etikett** | ✅ Direkt nachgewiesen: verändert man eine einzelne Zeile massiv, ändert sich die Kodierung aller FRÜHEREN Zeilen derselben Kategorie nicht - bei naivem Target Encoding ändert sich jede andere Zeile derselben Kategorie sofort. |
 | **Geordnetes Boosting: Block k nie mit den eigenen Zeilen trainiert** | ✅ Struktur-Invariante direkt geprüft: die Zeilen, mit denen der Baum für Block k trainiert wird, und die Zeilen, deren Vorhersage er aktualisiert, sind immer disjunkt. |
-| **Prediction Shift auf reinem Rauschen** (kein echtes Signal, 400 Zeilen, σ² = 49) | ✅ Bei Tiefe 6: In-Sample-Rest 40,6 (unter der wahren Varianz - sieht besser aus, als er ist), Rest gegen frische Werte 59,1 (darüber) - beide Enden weichen mit wachsender Tiefe weiter von σ² ab. |
+| **Prediction Shift auf reinem Rauschen** (kein echtes Signal, 400 Zeilen, σ² = 49) | ✅ Bei Tiefe 6: In-Sample-Rest 39,1 (unter der wahren Varianz - sieht besser aus, als er ist), Rest gegen frische Werte 60,2 (darüber) - beide Enden weichen mit wachsender Tiefe weiter von σ² ab. |
 | **Leckage: Target Encoding gegen geordnete Target Statistics** (Mittel über fünf Datensätze) | ✅ Naiv: R² mit dem Ziel 5,6 % im Training gegen 3,4 % im ehrlichen Test (Leckage). Geordnet: 1,0 % im Training - schon nah am ehrlichen Wert. |
 | **Wirkung der Kardinalität** (4 bis 48 Depot-Stufen) | ✅ Naives Leck wächst in der Tendenz mit der Kardinalität (−0,2 % bei 4 Depots auf +8,5 % bei 48) - weniger Zeilen je Kategorie heißt mehr Gewicht der eigenen Zeile. Geordnet bleibt über alle Stufenzahlen nah bei 0. |
 | **Kreuzprobe mit der echten `catboost`-Bibliothek** | ⚠️ Nur über Rang-/Fehlergrenzen (Korrelation > 0,9) - die eigene, vereinfachte Blockannäherung des geordneten Boostings unterscheidet sich von CatBoosts echtem $O(\log n)$-Schema, kein exakter Abgleich. |
@@ -60,8 +60,8 @@ CART → AdaBoost → Gradient Boosting → XGBoost → LightGBM → CatBoost (d
   der einzige Rest an "ungeordneter" Leckage in diesem vereinfachten Schema, begrenzt auf 1/`n_blocks` der Zeilen, derselbe Preis, den auch CatBoosts eigene Stützmodelle für die ersten
   Zeilen der Permutation zahlen. Ein Regressionstest hält das fest (`test_ordered_boosting_is_numerically_stable_at_default_like_settings`).
 - **Geordnetes Boosting gewinnt in dieser vereinfachten Fassung nicht gegen gewöhnliches:** die ursprüngliche Erwartung war, dass geordnetes Boosting durchgehend besser generalisiert
-  (weniger Prediction Shift). Gemessen über mehrere Tiefen, Blockzahlen und Datensatzgrößen zeigt sich das Gegenteil: der Testfehler ist durchgehend etwas höher als bei gewöhnlichem
-  Boosting. Grund, so weit nachvollzogen: jeder Baum sieht nur einen Bruchteil der Zeilen (höchstens `(n_blocks-1)/n_blocks`), UND es wird nur EINE feste Permutation verwendet (kein
+  (weniger Prediction Shift). Gemessen über 16 Kombinationen aus Tiefe (2, 3, 4, 6), Blockzahl (4, 8) und Datensatzgröße (600, 1200; Seed 7) zeigt sich eher das Gegenteil: geordnet hat in 11 Kombinationen den höheren Testfehler,
+  in 5 den niedrigeren (einzelne Testfehler, keine Mittelung über Datensätze). Grund, so weit nachvollzogen: jeder Baum sieht nur einen Bruchteil der Zeilen (höchstens `(n_blocks-1)/n_blocks`), UND es wird nur EINE feste Permutation verwendet (kein
   Mitteln über mehrere, wie es das echte CatBoost tut) - der Effizienzverlust überwiegt den Verzerrungsgewinn auf diesem Datensatz. Ehrlich als offene Grenze berichtet, nicht wegoptimiert.
 - **Kodierungs-Leckage zeigt sich klar in der Kodierung selbst, aber nicht zuverlässig im End-zu-End-Testfehler:** die R²-Lücke (Training gegen ehrlichen Test) der naiven Kodierung ist
   eindeutig und wächst mit der Kardinalität - ein direkter, sauberer Nachweis der Leckage. Im vollen Boosting-Modell (Preset "Naives Target Encoding" gegen "Geordnete Target Statistics") schneidet naive
@@ -70,9 +70,12 @@ CART → AdaBoost → Gradient Boosting → XGBoost → LightGBM → CatBoost (d
 - **Keine 2D-Entscheidungsgrenzen-Karte** wie in den Vorgänger-Stücken: die kodierten Merkmale haben je nach Kodierung unterschiedlich viele Spalten (One-Hot spreizt eine Kategorie in
   viele Spalten auf), eine feste Karten-Achse würde bei jedem Kodierungswechsel etwas anderes bedeuten. Der symmetrische Baum selbst zeigt das Besondere dieses Stücks ohnehin besser.
 
+- **Bin-Fehler (korrigiert 2026-09-24):** die Bin-Zuordnung (`x == Kante` fiel in den rechten Bin) passte nicht zur Regel "`x > Schwelle` geht nach rechts"; bei Kanten, die mit Datenwerten zusammenfallen (seltene 0/1-Merkmale, ganzzahlige Werte, Wiederholungen), war der Split wirkungslos. Jetzt gilt `Kante[k-1] < x <= Kante[k]` (`side="left"`), wie im LightGBM-Stück.
+  **Folgen für die Zahlen:** Standard-Preset Trainings-/Testfehler 21,4/22,2 % → 20,7/20,8 %; Naives Target Encoding 15,7/18,6 % → 15,2/19,4 %; Geordnete Target Statistics 17,3/20,6 % → 17,4/20,0 %; Regression Test-RMSE 14,2 → 13,6 Minuten; Prediction Shift bei Tiefe 6: 40,6/59,1 → 39,1/60,2. Leckage- und Kardinalitäts-Experiment unverändert.
+
 ## Verifikation
 
-`tests/test_algorithm.py` (13 Tests): symmetrische Gain-Formel exakt gegen Brute-Force bei Tiefe 1; jeder Baum hat exakt $2^d$ Blätter; geordnete Target Statistics nutzt nachweislich nie
+`tests/test_algorithm.py` (14 Tests): symmetrische Gain-Formel exakt gegen Brute-Force bei Tiefe 1; jeder Baum hat exakt $2^d$ Blätter; geordnete Target Statistics nutzt nachweislich nie
 das eigene Etikett (naives Target Encoding tut es); geordnetes Boosting trainiert den Baum für Block $k$ nachweislich nie mit Block $k$'s eigenen Zeilen; Regressionstest für den behobenen
 Explosions-Fehler; Prediction-Shift-Verzerrung auf reinem Rauschen; Vorhersagen über Rang-/Fehlergrenzen gegen die echte `catboost`-Bibliothek; Grenzfälle (eine Runde, Depot-Erzeugung).
 `tests/test_claims.py` (9 Tests) hält **jede Zahl** aus App und README fest. `tests/test_app.py` (21 Tests) prüft die Oberfläche per AppTest (jedes Preset, Aufgaben- und Kodierungswechsel,

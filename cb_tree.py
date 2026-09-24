@@ -40,7 +40,7 @@ def digitize(X, edges):
     m, d = X.shape
     bins = np.empty((m, d), dtype=np.int32)
     for f in range(d):
-        bins[:, f] = np.searchsorted(edges[f], X[:, f], side="right")
+        bins[:, f] = np.searchsorted(edges[f], X[:, f], side="left")
     return bins
 
 
