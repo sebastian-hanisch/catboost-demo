@@ -55,6 +55,7 @@ class Analysis:
     verdict: str
     imp: np.ndarray
     encoders: dict
+    Xtr_e: np.ndarray = None      # die Trainingsmatrix so, wie das Ensemble sie gesehen hat (bei geordneten Target Statistics: Kodierung vor der eigenen Zeile)
 
 
 def analyse(task, encoding, depth, lam, max_bin, n_rounds, lr, ordered, n_blocks, n, n_noise, label_noise, n_depots, seed):
@@ -69,7 +70,7 @@ def analyse(task, encoding, depth, lam, max_bin, n_rounds, lr, ordered, n_blocks
     train = _metrics(ensemble, Xtr_e, ytr, task)
     test = _metrics(ensemble, Xte_e, yte, task)
     baseline = baseline_error(ds, task)
-    a = Analysis(ds, task, encoding, depth, lam, max_bin, n_rounds, lr, ordered, n_blocks, ensemble, train, test, baseline, "", ensemble_importances(ensemble, Xtr_e.shape[1]), encoders)
+    a = Analysis(ds, task, encoding, depth, lam, max_bin, n_rounds, lr, ordered, n_blocks, ensemble, train, test, baseline, "", ensemble_importances(ensemble, Xtr_e.shape[1]), encoders, Xtr_e)
     a.verdict = verdict(a)
     return a
 
@@ -87,7 +88,7 @@ def verdict(a):
 def round_rows(a, ks=None):
     ks = ks or sorted(set(np.unique(np.round(np.geomspace(1, a.n_rounds, min(20, a.n_rounds))).astype(int))))
     Xtr, ytr, Xte, yte = S.split(a.ds, a.task)
-    Xtr_e = E.apply_encoding(Xtr, C.CAT_FEATURES, a.encoders)
+    Xtr_e = a.Xtr_e                                                            # NICHT neu über `apply_encoding`: das schlüge bei geordneten Target Statistics das volle Kategorienmittel nach (inkl. eigenem Etikett) und passte nicht zur Trainingskodierung
     Xte_e = E.apply_encoding(Xte, C.CAT_FEATURES, a.encoders)
     rows = []
     for k in ks:
