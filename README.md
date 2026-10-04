@@ -27,7 +27,7 @@ CART → AdaBoost → Gradient Boosting → XGBoost → LightGBM → CatBoost (d
 | **Geordnete Target Statistics nutzt nie das eigene Etikett** | ✅ Direkt nachgewiesen: verändert man eine einzelne Zeile massiv, ändert sich die Kodierung aller FRÜHEREN Zeilen derselben Kategorie nicht - bei naivem Target Encoding ändert sich jede andere Zeile derselben Kategorie sofort. |
 | **Geordnetes Boosting: Block k nie mit den eigenen Zeilen trainiert** | ✅ Struktur-Invariante direkt geprüft: die Zeilen, mit denen der Baum für Block k trainiert wird, und die Zeilen, deren Vorhersage er aktualisiert, sind immer disjunkt. |
 | **Prediction Shift auf reinem Rauschen** (kein echtes Signal, 400 Zeilen, σ² = 49) | ✅ Bei Tiefe 6: In-Sample-Rest 39,1 (unter der wahren Varianz - sieht besser aus, als er ist), Rest gegen frische Werte 60,2 (darüber) - beide Enden weichen mit wachsender Tiefe weiter von σ² ab. |
-| **Leckage: Target Encoding gegen geordnete Target Statistics** (Mittel über fünf Datensätze) | ✅ Naiv: R² mit dem Ziel 5,6 % im Training gegen 3,4 % im ehrlichen Test (Leckage). Geordnet: 1,0 % im Training - schon nah am ehrlichen Wert. |
+| **Leckage: Target Encoding gegen geordnete Target Statistics** (Mittel über fünf Datensätze) | ✅ Naiv: R² mit dem Ziel 5,6 % im Training gegen 3,4 % im ehrlichen Test (Leckage). Geordnet: 1,0 % im Training - nicht über dem ehrlichen Wert (eher darunter). |
 | **Wirkung der Kardinalität** (4 bis 48 Depot-Stufen) | ✅ Naives Leck wächst in der Tendenz mit der Kardinalität (−0,2 % bei 4 Depots auf +8,5 % bei 48) - weniger Zeilen je Kategorie heißt mehr Gewicht der eigenen Zeile. Geordnet bleibt über alle Stufenzahlen nah bei 0. |
 | **Kreuzprobe mit der echten `catboost`-Bibliothek** | ⚠️ Nur über Rang-/Fehlergrenzen (Korrelation > 0,9) - die eigene, vereinfachte Blockannäherung des geordneten Boostings unterscheidet sich von CatBoosts echtem $O(\log n)$-Schema, kein exakter Abgleich. |
 | **Geordnetes Boosting gegen gewöhnliches, End-zu-End** | ⚠️ **Ehrlich negativ:** in dieser vereinfachten Fassung (eine feste Permutation, feste statt geometrisch wachsender Blöcke) schneidet geordnetes Boosting NICHT besser ab als gewöhnliches - der Preis, weniger Zeilen je Baum zu sehen, überwiegt den Gain aus weniger Verzerrung (siehe "Was nicht funktioniert hat"). |
@@ -112,4 +112,4 @@ venv\Scripts\python -m pytest tests -q
 
 ---
 
-Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning.
+Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zur Reihe: [Baumbasierte Verfahren: von CART bis CatBoost](https://sebastianhanisch.net/konzepte-baumbasiert.html).

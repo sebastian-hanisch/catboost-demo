@@ -255,8 +255,8 @@ if st.session_state.get("leak_on"):
         lk = _leakage(int(n), int(n_depots))
     st.plotly_chart(build_leakage_chart(lk), width="stretch", key="leakage_chart")
     st.caption(f"R² zwischen der Depot-Kodierung und der Lieferdauer, Mittel über fünf Datensätze: naiv sieht im Training ({lk['naive_train']:.1%}) deutlich besser aus als im ehrlichen Test "
-               f"({lk['test']:.1%}) - das eigene Etikett jeder Zeile fließt in ihre eigene Kodierung ein. Geordnete Target Statistics liegt im Training ({lk['ordered_train']:.1%}) schon nah am "
-               "ehrlichen Wert - sie hat nie das eigene Etikett gesehen.")
+               f"({lk['test']:.1%}) - das eigene Etikett jeder Zeile fließt in ihre eigene Kodierung ein. Geordnete Target Statistics liegt im Training ({lk['ordered_train']:.1%}) nicht über dem "
+               "ehrlichen Wert (eher darunter) - sie hat nie das eigene Etikett gesehen.")
 
 st.markdown("---")
 
@@ -315,6 +315,6 @@ st.markdown("---")
 
 st.caption(
     "Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – "
-    "Operations Research und Machine Learning. Interesse an einer maßgeschneiderten Lösung für "
-    "Ihr Unternehmen? [Kontakt aufnehmen](https://sebastianhanisch.net/kontakt.html)"
+    "Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). "
+    "Mehr zur Reihe: [Baumbasierte Verfahren: von CART bis CatBoost](https://sebastianhanisch.net/konzepte-baumbasiert.html)."
 )
